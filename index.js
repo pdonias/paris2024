@@ -19,8 +19,17 @@ async function fetchData() {
   return countries
 }
 
+function getFlagEmoji(countryCode) {
+  const codePoints = countryCode
+    .toUpperCase()
+    .split('')
+    .map(char =>  127397 + char.charCodeAt());
+  const emoji = String.fromCodePoint(...codePoints);
+
+  return emoji
+}
+
 async function main() {
-  console.log('running')
   POINTS_PER_MEDAL.gold = +document.getElementById('gold').value
   POINTS_PER_MEDAL.silver = +document.getElementById('silver').value
   POINTS_PER_MEDAL.bronze = +document.getElementById('bronze').value
@@ -45,7 +54,7 @@ async function main() {
     const tr = document.createElement('tr')
     tr.innerHTML = `
 <td>${i + 1}</td>
-<td>${country.country.name}</td>
+<td>${getFlagEmoji(country.country.iso_alpha_2)}&nbsp;&nbsp;${country.country.name}</td>
 <td>${country.medals.gold}</td>
 <td>${country.medals.silver}</td>
 <td>${country.medals.bronze}</td>
