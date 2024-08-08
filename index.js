@@ -1,8 +1,5 @@
-const POINTS_PER_MEDAL = {
-  gold: 5,
-  silver: 2,
-  bronze: 1,
-}
+const POINTS_PER_MEDAL = {}
+let COUNTRIES
 
 function computePoints(country) {
   const { gold, silver, bronze } = country.medals
@@ -11,20 +8,39 @@ function computePoints(country) {
     bronze * POINTS_PER_MEDAL.bronze
 }
 
-async function main() {
+async function fetchData() {
   const response = await fetch('https://api.olympics.kevle.xyz/medals')
   if (!response.ok) {
     throw new Error(`Request failed (${response.status})`)
   }
 
   const countries = (await response.json()).results
-  countries.forEach(country => {
+
+  return countries
+}
+
+async function main() {
+  console.log('running')
+  POINTS_PER_MEDAL.gold = +document.getElementById('gold').value
+  POINTS_PER_MEDAL.silver = +document.getElementById('silver').value
+  POINTS_PER_MEDAL.bronze = +document.getElementById('bronze').value
+
+  if (Object.values(POINTS_PER_MEDAL).some(value => !Number.isInteger(value))) {
+    return
+  }
+
+  COUNTRIES.forEach(country => {
     country.points = computePoints(country)
   })
 
-  const sortedCountries = countries.sort((c1, c2) => c2.points - c1.points)
+  const sortedCountries = COUNTRIES.sort((c1, c2) => c2.points - c1.points)
 
   const table = document.querySelector('table')
+  table.querySelectorAll('tr').forEach((tr, i) => {
+    if (i > 0) {
+      table.removeChild(tr)
+    }
+  })
   sortedCountries.forEach((country, i) => {
     const tr = document.createElement('tr')
     tr.innerHTML = `
@@ -39,4 +55,9 @@ async function main() {
   })
 }
 
-main()
+fetchData().then(countries => {
+  COUNTRIES = countries
+  main()
+})
+
+document.querySelectorAll('input').forEach(input => input.addEventListener('input', main))
